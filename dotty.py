@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Copyright (C) 2015 Vibhav Pant <vibhavp@gmail.com>
 # This program is free software; you can redistribute it and/or modify
@@ -15,11 +15,20 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import print_function
 import json
 import os
 import shutil
-from sys import stderr
+from sys import stderr, version_info
 import argparse
+try:
+    import yaml
+    YAML_IMPORTED = True
+except ImportError:
+    YAML_IMPORTED = False
+
+if version_info[0] == 2:
+    input = raw_input
 
 
 def ask_user(prompt):
@@ -77,13 +86,23 @@ def run_command(command):
     os.system(command)
 
 
+def load_config(config_file):
+    with open(config_file) as f:
+        _, ext = os.path.splitext(config_file)
+        if ext in [".js"]:
+            return json.load(f)
+        elif YAML_IMPORTED and ext in [".yml", ".yaml"]:
+            return yaml.load(f)
+        raise ValueError("Unknown config format")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="the JSON file you want to use")
     parser.add_argument("-r", "--replace", action="store_true",
                         help="replace files/folders if they already exist")
     args = parser.parse_args()
-    js = json.load(open(args.config))
+    js = load_config(args.config)
     os.chdir(os.path.expanduser(os.path.abspath(os.path.dirname(args.config))))
 
     directories = js.get("directories")
@@ -91,6 +110,7 @@ def main():
     copy = js.get("copy")
     commands = js.get("commands")
     pacman = js.get("pacman")
+    apt = js.get("apt")
 
     if directories: [create_directory(path) for path in directories]
 
@@ -101,11 +121,12 @@ def main():
     if commands: [run_command(command) for command in commands]
 
     if pacman:
-        packages = ""
-        for package in pacman:
-            packages += package + " "
-
+        packages = " ".join(pacman)
         run_command("sudo pacman -S "+packages)
+
+    if apt:
+        packages = " ".join(apt)
+        run_command("sudo apt-get install "+packages)
 
     print("Done!")
 
