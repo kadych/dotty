@@ -49,7 +49,7 @@ def create_directory(path):
         os.makedirs(exp)
 
 
-def create_symlink(src, dest, replace):
+def _create_symlink(src, dest, replace):
     dest = os.path.expanduser(dest)
     src = os.path.abspath(src)
     if os.path.exists(dest):
@@ -65,6 +65,14 @@ def create_symlink(src, dest, replace):
             return
     print("Linking {0} -> {1}".format(dest, src))
     os.symlink(src, dest)
+
+
+def create_symlink(src, dest, replace):
+    if isinstance(dest, list):
+        for item in dest:
+            _create_symlink(src, item, replace)
+    else:
+        _create_symlink(src, dest, replace)
 
 
 def copy_path(src, dest):
@@ -112,21 +120,21 @@ def main():
     pacman = js.get("pacman")
     apt = js.get("apt")
 
-    if directories: [create_directory(path) for path in directories]
+    # if directories: [create_directory(path) for path in directories]
 
     if links: [create_symlink(src, links[src], args.replace) for src in links]
 
-    if copy: [copy_path(src, copy[src]) for src in copy]
+    # if copy: [copy_path(src, copy[src]) for src in copy]
 
-    if commands: [run_command(command) for command in commands]
+    # if commands: [run_command(command) for command in commands]
 
-    if pacman:
-        packages = " ".join(pacman)
-        run_command("sudo pacman -S "+packages)
+    # if pacman:
+    #     packages = " ".join(pacman)
+    #     run_command("sudo pacman -S "+packages)
 
-    if apt:
-        packages = " ".join(apt)
-        run_command("sudo apt-get install "+packages)
+    # if apt:
+    #     packages = " ".join(apt)
+    #     run_command("sudo apt-get install "+packages)
 
     print("Done!")
 
