@@ -120,21 +120,21 @@ def main():
     pacman = js.get("pacman")
     apt = js.get("apt")
 
-    # if directories: [create_directory(path) for path in directories]
+    if directories: [create_directory(path) for path in directories]
 
     if links: [create_symlink(src, links[src], args.replace) for src in links]
 
-    # if copy: [copy_path(src, copy[src]) for src in copy]
+    if copy: [copy_path(src, copy[src]) for src in copy]
 
-    # if commands: [run_command(command) for command in commands]
+    if commands: [run_command(command) for command in commands]
 
-    # if pacman:
-    #     packages = " ".join(pacman)
-    #     run_command("sudo pacman -S "+packages)
+    if pacman:
+        packages = " ".join(pacman)
+        run_command("sudo pacman -S "+packages)
 
-    # if apt:
-    #     packages = " ".join(apt)
-    #     run_command("sudo apt-get install "+packages)
+    if apt:
+        packages = " ".join(apt)
+        run_command("sudo apt-get install "+packages)
 
     print("Done!")
 
